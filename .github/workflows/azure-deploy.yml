@@ -23,17 +23,18 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: 🔍 Diagnose validation (dummy password)
+    - name: 🔍 Diagnose validation (hard-coded location & password)
       run: |
-        echo "=== DIAGNOSE ==="
+        echo "=== DIAGNOSE HARD-CODED ==="
         az deployment sub validate \
           --name diag-validate-${{ github.run_number }} \
-          --location ${{ secrets.LOCATION }} \
+          --location canadaeast \
           --template-file main.bicep \
           --parameters \
-              location=${{ secrets.LOCATION }} \
+              location=canadaeast \
               adminPassword='DummyP@ssw0rd!234' \
-          --output jsonc --verbose
+          --debug
+
 
 
     # ─────────── 2. Validate with Azure CLI (shows full JSON error) ───────────
