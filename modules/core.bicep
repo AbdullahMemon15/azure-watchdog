@@ -47,6 +47,7 @@ module alerts './alerts.bicep' = {
   name: 'alerts'
   params: {
     location: location
+    actionLocation: 'global'
     notificationEmail: 'abdullahakhund@gmail.com'   // replace as needed
     teamsWebhookUri:  ''                            // paste connector URL later
     logAnalyticsWorkspaceId: la.id                 // ← pass LA workspace
