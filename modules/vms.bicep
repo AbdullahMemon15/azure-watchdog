@@ -71,19 +71,16 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, 
 }]
 
 // Log Analytics extension for both VMs
+// ── Log Analytics VM extension (MMA) ───────────────────────────────
 resource laExt 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [for i in range(0, 2): {
     parent: vm[i]
-    name: 'OmsAgentForWindows${i}'   // <-- Unique name per VM!
+    name:  'AzureMonitorWindowsAgent'
     location: location
     properties: {
       publisher: 'Microsoft.Azure.Monitor'
-      type: 'OmsAgentForWindows'
+      type: 'AzureMonitorWindowsAgent'
       typeHandlerVersion: '1.0'
       autoUpgradeMinorVersion: true
-      settings: {
-        workspaceId: logAnalyticsWorkspaceId
-      }
-      // protectedSettings is NOT required for the default agent
     }
 }]
 
