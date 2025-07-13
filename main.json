@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "10806840343371080418"
+      "templateHash": "10286139116657845164"
     }
   },
   "parameters": {
@@ -90,7 +90,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "8920571268459907750"
+              "templateHash": "5841305229425077311"
             }
           },
           "parameters": {
@@ -150,7 +150,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.36.177.2456",
-                      "templateHash": "15283395897222201993"
+                      "templateHash": "17096026971422126864"
                     }
                   },
                   "parameters": {
@@ -161,7 +161,7 @@
                   "resources": [
                     {
                       "type": "Microsoft.Network/virtualNetworks",
-                      "apiVersion": "2023-05-01",
+                      "apiVersion": "2022-07-01",
                       "name": "watchdog-vnet",
                       "location": "[parameters('location')]",
                       "properties": {
@@ -211,7 +211,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.36.177.2456",
-                      "templateHash": "15781070297558481297"
+                      "templateHash": "14747069580090360363"
                     }
                   },
                   "parameters": {
@@ -248,7 +248,7 @@
                         "count": "[length(range(0, 2))]"
                       },
                       "type": "Microsoft.Network/networkInterfaces",
-                      "apiVersion": "2023-05-01",
+                      "apiVersion": "2022-11-01",
                       "name": "[format('watchdog-nic{0}', range(0, 2)[copyIndex()])]",
                       "location": "[parameters('location')]",
                       "properties": {

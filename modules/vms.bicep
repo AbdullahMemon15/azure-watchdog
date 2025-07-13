@@ -1,4 +1,3 @@
-// modules/vms.bicep
 @description('Deployment region')
 param location string
 
@@ -12,9 +11,8 @@ param adminUsername string = 'azureuser'
 @description('Admin password for the VMs')
 param adminPassword string
 
-// NICs
-resource nic 'Microsoft.Network/networkInterfaces@2023-05-01' = [
-  for i in range(0, 2): {
+// 2 NICs
+resource nic 'Microsoft.Network/networkInterfaces@2022-11-01' = [for i in range(0, 2): {
     name: 'watchdog-nic${i}'
     location: location
     properties: {
@@ -23,20 +21,18 @@ resource nic 'Microsoft.Network/networkInterfaces@2023-05-01' = [
           name: 'ipconfig1'
           properties: {
             subnet: {
-              id: resourceId('Microsoft.Network/virtualNetworks/subnets',
-                             'watchdog-vnet', 'default')
+              id: resourceId('Microsoft.Network/virtualNetworks/subnets', 'watchdog-vnet', 'default')
             }
             privateIPAllocationMethod: 'Dynamic'
           }
         }
       ]
     }
-  }
-]
 
-// VMs
-resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [
-  for i in range(0, 2): {
+}]
+
+// 2 VMs
+resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, 2): {
     name: 'watchdog-vm${i}'
     location: location
     properties: {
@@ -55,25 +51,29 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [
           sku:       '2019-Datacenter'
           version:   'latest'
         }
-        osDisk: { createOption: 'FromImage' }
+        osDisk: {
+          createOption: 'FromImage'
+        }
       }
       networkProfile: {
         networkInterfaces: [
-          { id: nic[i].id }
+          {
+            id: nic[i].id
+          }
         ]
       }
       diagnosticsProfile: {
-        bootDiagnostics: { enabled: true }
+        bootDiagnostics: {
+          enabled: true
+        }
       }
     }
-  }
-]
+}]
 
-// Log Analytics extension -- FIXED LOOP
-resource laExt 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [
-  for i in range(0, 2): {
+// Log Analytics extension for both VMs
+resource laExt 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [for i in range(0, 2): {
     parent: vm[i]
-    name: 'OmsAgentForWindows${i}'
+    name: 'OmsAgentForWindows${i}'   // <-- Unique name per VM!
     location: location
     properties: {
       publisher: 'Microsoft.Azure.Monitor'
@@ -83,7 +83,7 @@ resource laExt 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [
       settings: {
         workspaceId: logAnalyticsWorkspaceId
       }
+      // protectedSettings is NOT required for the default agent
     }
-  }
-]
+}]
 
