@@ -23,6 +23,19 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: 🔍 Diagnose validation (dummy password)
+      run: |
+        echo "=== DIAGNOSE ==="
+        az deployment sub validate \
+          --name diag-validate-${{ github.run_number }} \
+          --location ${{ secrets.LOCATION }} \
+          --template-file main.bicep \
+          --parameters \
+              location=${{ secrets.LOCATION }} \
+              adminPassword='DummyP@ssw0rd!234' \
+          --output jsonc --verbose
+
+
     # ─────────── 2. Validate with Azure CLI (shows full JSON error) ───────────
     - name: Validate Bicep with az cli
       id: az-validate
