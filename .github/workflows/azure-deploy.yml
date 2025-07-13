@@ -35,7 +35,6 @@ jobs:
           --parameters \
               location=${{ secrets.LOCATION }} \
               adminPassword=${{ secrets.VM_PASSWORD }} \
-              budgetAmount=5 \
           --output jsonc --verbose
 
     # ─────────── 3. Deploy if validation succeeded ───────────
@@ -50,7 +49,6 @@ jobs:
         parameters: >
           location=${{ secrets.LOCATION }}
           adminPassword=${{ secrets.VM_PASSWORD }}
-          budgetAmount=5
         deploymentName: deploy-${{ github.run_number }}
 
     # ─────────── 4. Logout ───────────
