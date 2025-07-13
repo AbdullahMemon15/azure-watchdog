@@ -49,7 +49,7 @@ resource budget 'Microsoft.Consumption/budgets@2021-10-01' = {
         threshold: 80
         thresholdType: 'Percentage'
         contactEmails: [
-          'you@example.com'   // <-- change this to your email
+          'abdullahakhund@Gmail.com'   
         ]
       }
     }

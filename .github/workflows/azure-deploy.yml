@@ -22,17 +22,19 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy main.bicep at subscription scope
+    - name: Validate + deploy Bicep
       uses: azure/arm-deploy@v2
       with:
-        scope:             subscription
-        subscriptionId:    ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-        region:            ${{ secrets.LOCATION }}
-        template:          ./main.bicep
+        scope: subscription
+        subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+        region: ${{ secrets.LOCATION }}
+        template: ./main.bicep
         parameters: >
           location=${{ secrets.LOCATION }}
           adminPassword=${{ secrets.VM_PASSWORD }}
           budgetAmount=5
+        deploymentName: watchdog-${{ github.run_number }}
+        what-if: true
 
     - name: Logout
       run: az logout

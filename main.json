@@ -57,7 +57,7 @@
             "enabled": true,
             "operator": "GreaterThan",
             "threshold": 80,
-            "thresholdType": "Percentage",
+            "thresholdType": "Actual",
             "contactEmails": [
               "you@example.com"
             ]
