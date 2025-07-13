@@ -1,70 +1,53 @@
-name: Azure Bicep Deploy
+name: Deploy Azure Watchdog (Bicep)
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main       # run every time main is updated
 
 permissions:
-  id-token: write
-  contents: read
+  contents: read   # required by actions/checkout
+
+env:
+  AZURE_LOCATION: ${{ secrets.LOCATION }}   # e.g. canadaeast
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # ─────────── 0. Check out code ───────────
-    - name: Checkout
+    # ────────────────────────── 1. Source  ──────────────────────────
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    # ─────────── 1. Azure login ──────────────
-    - name: Azure login
+    # ────────────────────────── 2. Login  ───────────────────────────
+    - name: Azure CLI login
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}   # SP JSON from `az ad sp create-for-rbac …`
 
-    - name: 🔍 Diagnose validation (hard-coded location & password)
+    # ────────────────────────── 3a. Validate  ───────────────────────
+    - name: Validate Bicep (subscription-scope)
       run: |
-        echo "=== DIAGNOSE HARD-CODED ==="
-        az deployment sub validate \
-          --name diag-validate-${{ github.run_number }} \
-          --location canadaeast \
-          --template-file main.bicep \
-          --parameters \
-              location=canadaeast \
-              adminPassword='DummyP@ssw0rd!234' \
-          --debug
-
-
-
-    # ─────────── 2. Validate with Azure CLI (shows full JSON error) ───────────
-    - name: Validate Bicep with az cli
-      id: az-validate
-      run: |
-        echo "=== Subscription-scope validation ==="
         az deployment sub validate \
           --name watchdog-validate-${{ github.run_number }} \
-          --location ${{ secrets.LOCATION }} \
+          --location "$AZURE_LOCATION" \
           --template-file main.bicep \
           --parameters \
-              location=${{ secrets.LOCATION }} \
-              adminPassword=${{ secrets.VM_PASSWORD }} \
-          --output jsonc --verbose
+              location="$AZURE_LOCATION" \
+              adminPassword="${{ secrets.VM_PASSWORD }}"
 
-    # ─────────── 3. Deploy if validation succeeded ───────────
-    - name: Deploy Bicep (subscription scope)
-      if: steps.az-validate.outcome == 'success'
+    # ────────────────────────── 3b. Deploy  ─────────────────────────
+    - name: Deploy Bicep (subscription-scope)
       uses: azure/arm-deploy@v2
       with:
         scope: subscription
-        subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-        region: ${{ secrets.LOCATION }}
+        region: ${{ env.AZURE_LOCATION }}
         template: ./main.bicep
-        parameters: >
-          location=${{ secrets.LOCATION }}
+        parameters: |
+          location=${{ env.AZURE_LOCATION }}
           adminPassword=${{ secrets.VM_PASSWORD }}
-        deploymentName: deploy-${{ github.run_number }}
-
+        failOnStdErr: false   # warnings (if any) won’t fail the job
     # ─────────── 4. Logout ───────────
     - name: Logout
       run: az logout

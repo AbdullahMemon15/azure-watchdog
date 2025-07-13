@@ -81,6 +81,9 @@ resource laExt 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [for 
       type: 'AzureMonitorWindowsAgent'
       typeHandlerVersion: '1.0'
       autoUpgradeMinorVersion: true
+      settings: {
+        workspaceId: logAnalyticsWorkspaceId
+      }
     }
 }]
 
