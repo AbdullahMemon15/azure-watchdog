@@ -31,7 +31,7 @@ jobs:
         parameters: |
           location=${{ secrets.LOCATION }}
           adminPassword=${{ secrets.VM_PASSWORD }}
-          budgetAmount=5      # (or set to another value if you want)
+          budgetAmount=5
 
     - name: Logout from Azure
       run: az logout
