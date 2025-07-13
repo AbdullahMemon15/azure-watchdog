@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "10001421434450184846"
+      "templateHash": "10260077145627152658"
     }
   },
   "parameters": {
@@ -21,6 +21,20 @@
       "metadata": {
         "description": "Admin password for the VMs"
       }
+    },
+    "budgetAmount": {
+      "type": "int",
+      "defaultValue": 20,
+      "metadata": {
+        "description": "Monthly budget in USD"
+      }
+    },
+    "budgetStartDate": {
+      "type": "string",
+      "defaultValue": "[utcNow('yyyy-MM-01')]",
+      "metadata": {
+        "description": "Start date for the budget (first day of current month)"
+      }
     }
   },
   "resources": [
@@ -33,6 +47,36 @@
         "env": "dev",
         "owner": "abdullah"
       }
+    },
+    {
+      "type": "Microsoft.Consumption/budgets",
+      "apiVersion": "2021-10-01",
+      "name": "watchdog-budget",
+      "properties": {
+        "amount": "[parameters('budgetAmount')]",
+        "category": "Cost",
+        "timeGrain": "Monthly",
+        "timePeriod": {
+          "startDate": "[parameters('budgetStartDate')]"
+        },
+        "notifications": {
+          "threshold80": {
+            "enabled": true,
+            "operator": "GreaterThan",
+            "threshold": 80,
+            "thresholdType": "Percentage",
+            "contactEmails": [
+              "abdullahakhund@gmail.com"
+            ],
+            "contactGroups": [
+              "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'core'), '2022-09-01').outputs.actionGroupId.value]"
+            ]
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'core')]"
+      ]
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -59,7 +103,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "7894135076819203456"
+              "templateHash": "6946540113802166059"
             }
           },
           "parameters": {
@@ -180,7 +224,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.36.177.2456",
-                      "templateHash": "12158216230529095460"
+                      "templateHash": "18156560492809813786"
                     }
                   },
                   "parameters": {
@@ -293,7 +337,10 @@
                         "publisher": "Microsoft.Azure.Monitor",
                         "type": "AzureMonitorWindowsAgent",
                         "typeHandlerVersion": "1.0",
-                        "autoUpgradeMinorVersion": true
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                          "workspaceId": "[parameters('logAnalyticsWorkspaceId')]"
+                        }
                       },
                       "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', format('watchdog-vm{0}', range(0, 2)[range(0, 2)[copyIndex()]]))]"
@@ -305,8 +352,165 @@
               "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', 'watchdog-law')]"
               ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "alerts",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "actionGroupLocation": {
+                    "value": "global"
+                  },
+                  "alertRuleLocation": {
+                    "value": "eastus"
+                  },
+                  "notificationEmail": {
+                    "value": "abdullahakhund@gmail.com"
+                  },
+                  "teamsWebhookUri": {
+                    "value": ""
+                  },
+                  "logAnalyticsWorkspaceId": {
+                    "value": "[resourceId('Microsoft.OperationalInsights/workspaces', 'watchdog-law')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.36.177.2456",
+                      "templateHash": "5068296117079119767"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Deployment region"
+                      }
+                    },
+                    "notificationEmail": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "E-mail address for all alerts"
+                      }
+                    },
+                    "teamsWebhookUri": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Teams/Slack webhook URI (leave \"\" to skip)"
+                      }
+                    },
+                    "logAnalyticsWorkspaceId": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "(Optional) Log Analytics workspace ID for heartbeat alert"
+                      }
+                    },
+                    "actionGroupLocation": {
+                      "type": "string",
+                      "defaultValue": "global",
+                      "metadata": {
+                        "description": "Region for Action Group"
+                      }
+                    },
+                    "alertRuleLocation": {
+                      "type": "string",
+                      "defaultValue": "eastus",
+                      "metadata": {
+                        "description": "Region for alert rules (must be in the allowed list)"
+                      }
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Insights/actionGroups",
+                      "apiVersion": "2023-01-01",
+                      "name": "watchdog-ag",
+                      "location": "[parameters('actionGroupLocation')]",
+                      "properties": {
+                        "groupShortName": "watchdog",
+                        "enabled": true,
+                        "emailReceivers": [
+                          {
+                            "name": "PrimaryEmail",
+                            "emailAddress": "[parameters('notificationEmail')]"
+                          }
+                        ],
+                        "webhookReceivers": "[if(empty(parameters('teamsWebhookUri')), createArray(), createArray(createObject('name', 'TeamsHook', 'serviceUri', parameters('teamsWebhookUri'), 'useCommonAlertSchema', true())))]"
+                      }
+                    },
+                    {
+                      "condition": "[not(empty(parameters('logAnalyticsWorkspaceId')))]",
+                      "type": "Microsoft.Insights/scheduledQueryRules",
+                      "apiVersion": "2022-08-01-preview",
+                      "name": "watchdog-heartbeat-missing",
+                      "location": "[parameters('alertRuleLocation')]",
+                      "properties": {
+                        "enabled": true,
+                        "description": "Alert if any VM stops sending heartbeat for 5 minutes",
+                        "severity": 2,
+                        "evaluationFrequency": "PT5M",
+                        "windowSize": "PT5M",
+                        "scopes": [
+                          "[parameters('logAnalyticsWorkspaceId')]"
+                        ],
+                        "criteria": {
+                          "allOf": [
+                            {
+                              "query": "            Heartbeat\r\n            | summarize LastSeen=max(TimeGenerated) by Computer\r\n            | where LastSeen < ago(5m)\r\n          ",
+                              "timeAggregation": "Count",
+                              "threshold": 0,
+                              "operator": "GreaterThan",
+                              "failingPeriods": {
+                                "numberOfEvaluationPeriods": 1,
+                                "minFailingPeriodsToAlert": 1
+                              }
+                            }
+                          ]
+                        },
+                        "actions": {
+                          "actionGroups": [
+                            "[resourceId('Microsoft.Insights/actionGroups', 'watchdog-ag')]"
+                          ]
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Insights/actionGroups', 'watchdog-ag')]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "actionGroupId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Insights/actionGroups', 'watchdog-ag')]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', 'watchdog-law')]"
+              ]
             }
-          ]
+          ],
+          "outputs": {
+            "actionGroupId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'alerts'), '2022-09-01').outputs.actionGroupId.value]"
+            }
+          }
         }
       },
       "dependsOn": [
