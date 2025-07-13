@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "10286139116657845164"
+      "templateHash": "11436133337842810405"
     }
   },
   "parameters": {
@@ -27,6 +27,13 @@
       "defaultValue": 5,
       "metadata": {
         "description": "Monthly budget (USD)"
+      }
+    },
+    "budgetStartDate": {
+      "type": "string",
+      "defaultValue": "2025-07-10",
+      "metadata": {
+        "description": "Budget start date (YYYY-MM-DD)"
       }
     }
   },
@@ -50,7 +57,7 @@
         "amount": "[parameters('budgetAmount')]",
         "timeGrain": "Monthly",
         "timePeriod": {
-          "startDate": "2025-07-15"
+          "startDate": "[parameters('budgetStartDate')]"
         },
         "notifications": {
           "threshold80": {
@@ -59,7 +66,7 @@
             "threshold": 80,
             "thresholdType": "Actual",
             "contactEmails": [
-              "you@example.com"
+              "abdullahakhund@Gmail.com"
             ]
           }
         }
