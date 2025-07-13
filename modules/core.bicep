@@ -42,3 +42,16 @@ module vms './vms.bicep' = {
     adminPassword: adminPassword
   }
 }
+
+module alerts './alerts.bicep' = {
+  name: 'alerts'
+  params: {
+    location: location
+    notificationEmail: 'abdullahakhund@gmail.com'   // replace as needed
+    teamsWebhookUri:  ''                            // paste connector URL later
+    logAnalyticsWorkspaceId: la.id                 // ← pass LA workspace
+  }
+}
+
+// modules/core.bicep
+output actionGroupId string = alerts.outputs.actionGroupId

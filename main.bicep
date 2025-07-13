@@ -8,6 +8,11 @@ param location string = 'canadaeast'
 @description('Admin password for the VMs')
 param adminPassword string
 
+@description('Monthly budget in USD')
+param budgetAmount int = 20     // change to any limit you want
+
+@description('Start date for the budget (first day of current month)')
+param budgetStartDate string = utcNow('yyyy-MM-01')
 
 // 1. Create resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -29,3 +34,26 @@ module core './modules/core.bicep' = {
   }
 }
 
+resource budget 'Microsoft.Consumption/budgets@2021-10-01' = {
+  name: 'watchdog-budget'
+  scope: subscription()
+  properties: {
+    timePeriod: {
+      // first day of the current month
+      startDate: budgetStartDate
+    }
+    notifications: {
+      threshold80: {
+        enabled: true
+        threshold: 80
+        thresholdType: 'Percentage'
+        contactEmails: [
+          'abdullahakhund@gmail.com'
+        ]
+        contactGroups: [
+          core.outputs.actionGroupId           // the module output
+        ]
+      }
+    }
+  }
+}
