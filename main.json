@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "11436133337842810405"
+      "templateHash": "10001421434450184846"
     }
   },
   "parameters": {
@@ -21,20 +21,6 @@
       "metadata": {
         "description": "Admin password for the VMs"
       }
-    },
-    "budgetAmount": {
-      "type": "int",
-      "defaultValue": 5,
-      "metadata": {
-        "description": "Monthly budget (USD)"
-      }
-    },
-    "budgetStartDate": {
-      "type": "string",
-      "defaultValue": "2025-07-10",
-      "metadata": {
-        "description": "Budget start date (YYYY-MM-DD)"
-      }
     }
   },
   "resources": [
@@ -46,30 +32,6 @@
       "tags": {
         "env": "dev",
         "owner": "abdullah"
-      }
-    },
-    {
-      "type": "Microsoft.Consumption/budgets",
-      "apiVersion": "2021-10-01",
-      "name": "watchdog-budget",
-      "properties": {
-        "category": "Cost",
-        "amount": "[parameters('budgetAmount')]",
-        "timeGrain": "Monthly",
-        "timePeriod": {
-          "startDate": "[parameters('budgetStartDate')]"
-        },
-        "notifications": {
-          "threshold80": {
-            "enabled": true,
-            "operator": "GreaterThan",
-            "threshold": 80,
-            "thresholdType": "Actual",
-            "contactEmails": [
-              "abdullahakhund@Gmail.com"
-            ]
-          }
-        }
       }
     },
     {
@@ -97,7 +59,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "5841305229425077311"
+              "templateHash": "7894135076819203456"
             }
           },
           "parameters": {
@@ -218,7 +180,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.36.177.2456",
-                      "templateHash": "14747069580090360363"
+                      "templateHash": "12158216230529095460"
                     }
                   },
                   "parameters": {
@@ -325,16 +287,13 @@
                       },
                       "type": "Microsoft.Compute/virtualMachines/extensions",
                       "apiVersion": "2023-03-01",
-                      "name": "[format('{0}/{1}', format('watchdog-vm{0}', range(0, 2)[range(0, 2)[copyIndex()]]), format('OmsAgentForWindows{0}', range(0, 2)[copyIndex()]))]",
+                      "name": "[format('{0}/{1}', format('watchdog-vm{0}', range(0, 2)[range(0, 2)[copyIndex()]]), 'AzureMonitorWindowsAgent')]",
                       "location": "[parameters('location')]",
                       "properties": {
                         "publisher": "Microsoft.Azure.Monitor",
-                        "type": "OmsAgentForWindows",
+                        "type": "AzureMonitorWindowsAgent",
                         "typeHandlerVersion": "1.0",
-                        "autoUpgradeMinorVersion": true,
-                        "settings": {
-                          "workspaceId": "[parameters('logAnalyticsWorkspaceId')]"
-                        }
+                        "autoUpgradeMinorVersion": true
                       },
                       "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', format('watchdog-vm{0}', range(0, 2)[range(0, 2)[copyIndex()]]))]"
