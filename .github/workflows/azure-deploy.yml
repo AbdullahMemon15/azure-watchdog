@@ -22,7 +22,8 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Validate + deploy Bicep
+    # 1️⃣  Validate only (no resources created)
+    - name: Validate Bicep (subscription scope)
       uses: azure/arm-deploy@v2
       with:
         scope: subscription
@@ -33,8 +34,24 @@ jobs:
           location=${{ secrets.LOCATION }}
           adminPassword=${{ secrets.VM_PASSWORD }}
           budgetAmount=5
-        deploymentName: watchdog-${{ github.run_number }}
-        what-if: true
+        deploymentMode: Validate          # <-- runs template validation only
+        deploymentName: validate-${{ github.run_number }}
+        failOnStdErr: false               # surfaces the JSON error in logs
+
+    # 2️⃣  Real deploy (runs only if validation succeeds)
+    - name: Deploy Bicep (subscription scope)
+      if: ${{ success() }}
+      uses: azure/arm-deploy@v2
+      with:
+        scope: subscription
+        subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+        region: ${{ secrets.LOCATION }}
+        template: ./main.bicep
+        parameters: >
+          location=${{ secrets.LOCATION }}
+          adminPassword=${{ secrets.VM_PASSWORD }}
+          budgetAmount=5
+        deploymentName: deploy-${{ github.run_number }}
 
     - name: Logout
       run: az logout
