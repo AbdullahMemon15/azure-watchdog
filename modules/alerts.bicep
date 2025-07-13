@@ -10,13 +10,16 @@ param teamsWebhookUri string = ''
 @description('(Optional) Log Analytics workspace ID for heartbeat alert')
 param logAnalyticsWorkspaceId string = ''
 
-@description('Region for Action Group / alert rules (must be a monitor-enabled region)')
-param actionLocation string = 'global'
+@description('Region for Action Group')
+param actionGroupLocation string = 'global'
+
+@description('Region for alert rules (must be in the allowed list)')
+param alertRuleLocation   string = 'eastus'
 
 //─────────────────────────── Action Group ───────────────────────────
 resource ag 'Microsoft.Insights/actionGroups@2023-01-01' = {
   name: 'watchdog-ag'
-  location: actionLocation       // any region works
+  location: actionGroupLocation       // any region works
   properties: {
     groupShortName: 'watchdog'
     enabled: true
@@ -24,7 +27,6 @@ resource ag 'Microsoft.Insights/actionGroups@2023-01-01' = {
       {
         name: 'PrimaryEmail'
         emailAddress: notificationEmail
-        status: 'Enabled'
       }
     ]
     webhookReceivers: empty(teamsWebhookUri) ? [] : [
@@ -40,7 +42,7 @@ resource ag 'Microsoft.Insights/actionGroups@2023-01-01' = {
 //──────────────────────── Heartbeat alert 5 min ──────────────────────
 resource heartbeatRule 'Microsoft.Insights/scheduledQueryRules@2022-08-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {
   name: 'watchdog-heartbeat-missing'
-  location: actionLocation
+  location: alertRuleLocation 
   properties: {
     enabled: true
     description: 'Alert if any VM stops sending heartbeat for 5 minutes'
