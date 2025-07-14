@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "10260077145627152658"
+      "templateHash": "18115621127914960432"
     }
   },
   "parameters": {
@@ -50,33 +50,27 @@
     },
     {
       "type": "Microsoft.Consumption/budgets",
-      "apiVersion": "2021-10-01",
+      "apiVersion": "2024-08-01",
       "name": "watchdog-budget",
       "properties": {
         "amount": "[parameters('budgetAmount')]",
         "category": "Cost",
-        "timeGrain": "Monthly",
-        "timePeriod": {
-          "startDate": "[parameters('budgetStartDate')]"
-        },
         "notifications": {
-          "threshold80": {
+          "Actual_GreaterThan_80_Percent": {
+            "contactEmails": [
+              "abdullahkahund@gmail.com"
+            ],
             "enabled": true,
             "operator": "GreaterThan",
             "threshold": 80,
-            "thresholdType": "Percentage",
-            "contactEmails": [
-              "abdullahakhund@gmail.com"
-            ],
-            "contactGroups": [
-              "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'core'), '2022-09-01').outputs.actionGroupId.value]"
-            ]
+            "thresholdType": "Actual"
           }
+        },
+        "timeGrain": "Monthly",
+        "timePeriod": {
+          "startDate": "[parameters('budgetStartDate')]"
         }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'core')]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -103,7 +97,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "6946540113802166059"
+              "templateHash": "13496267816894311538"
             }
           },
           "parameters": {
@@ -363,9 +357,6 @@
                 },
                 "mode": "Incremental",
                 "parameters": {
-                  "location": {
-                    "value": "[parameters('location')]"
-                  },
                   "actionGroupLocation": {
                     "value": "global"
                   },
@@ -389,16 +380,10 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.36.177.2456",
-                      "templateHash": "5068296117079119767"
+                      "templateHash": "5274199196079192869"
                     }
                   },
                   "parameters": {
-                    "location": {
-                      "type": "string",
-                      "metadata": {
-                        "description": "Deployment region"
-                      }
-                    },
                     "notificationEmail": {
                       "type": "string",
                       "metadata": {

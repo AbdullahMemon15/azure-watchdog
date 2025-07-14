@@ -46,7 +46,7 @@ module vms './vms.bicep' = {
 module alerts './alerts.bicep' = {
   name: 'alerts'
   params: {
-    location: location
+    // location: location
     actionGroupLocation     : 'global'
     alertRuleLocation       : 'eastus'
     notificationEmail: 'abdullahakhund@gmail.com'   // replace as needed

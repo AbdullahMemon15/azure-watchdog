@@ -1,5 +1,5 @@
-@description('Deployment region')
-param location string
+// @description('Deployment region')
+// param location string
 
 @description('E-mail address for all alerts')
 param notificationEmail string
@@ -15,6 +15,8 @@ param actionGroupLocation string = 'global'
 
 @description('Region for alert rules (must be in the allowed list)')
 param alertRuleLocation   string = 'eastus'
+
+
 
 //─────────────────────────── Action Group ───────────────────────────
 resource ag 'Microsoft.Insights/actionGroups@2023-01-01' = {

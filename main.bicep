@@ -34,30 +34,27 @@ module core './modules/core.bicep' = {
   }
 }
 
-resource budget 'Microsoft.Consumption/budgets@2021-10-01' = {
-  name: 'watchdog-budget'
+resource budget 'Microsoft.Consumption/budgets@2024-08-01' = {
   scope: subscription()
+  name: 'watchdog-budget'
   properties: {
     amount: budgetAmount
     category: 'Cost'
-    timeGrain: 'Monthly'
-    timePeriod: {
-      // first day of the current month
-      startDate: budgetStartDate
-    }
     notifications: {
-      threshold80: {
-        enabled: true
-        operator: 'GreaterThan' // required property
-        threshold: 80
-        thresholdType: 'Percentage'
+      Actual_GreaterThan_80_Percent: {
         contactEmails: [
-          'abdullahakhund@gmail.com'
+          'abdullahkahund@gmail.com'
         ]
-        contactGroups: [
-          core.outputs.actionGroupId           // the module output
-        ]
+        enabled: true
+        operator: 'GreaterThan'
+        threshold: 80
+        thresholdType: 'Actual'
       }
     }
+    timeGrain: 'Monthly'
+    timePeriod: {
+      startDate: budgetStartDate
+    }
+
   }
 }
