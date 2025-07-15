@@ -49,11 +49,13 @@ module alerts './alerts.bicep' = {
     // location: location
     actionGroupLocation     : 'global'
     alertRuleLocation       : 'eastus'
-    notificationEmail: 'abdullahakhund@gmail.com'   // replace as needed
-    teamsWebhookUri:  ''                            // paste connector URL later
-    logAnalyticsWorkspaceId: la.id                 // ← pass LA workspace
+    notificationEmail: 'abdullahakhund@gmail.com'   
+    teamsWebhookUri:  ''                            // paste connector URL 
+    logAnalyticsWorkspaceId: la.id                 // pass LA workspace
   }
 }
 
 // modules/core.bicep
 output actionGroupId string = alerts.outputs.actionGroupId
+output logAnalyticsWorkspaceId string = la.id
+
