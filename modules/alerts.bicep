@@ -1,6 +1,3 @@
-// @description('Deployment region')
-// param location string
-
 @description('E-mail address for all alerts')
 param notificationEmail string
 
@@ -21,7 +18,7 @@ param alertRuleLocation   string = 'eastus'
 //─────────────────────────── Action Group ───────────────────────────
 resource ag 'Microsoft.Insights/actionGroups@2023-01-01' = {
   name: 'watchdog-ag'
-  location: actionGroupLocation       // any region works
+  location: actionGroupLocation      
   properties: {
     groupShortName: 'watchdog'
     enabled: true

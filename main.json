@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "18115621127914960432"
+      "templateHash": "12258596478266276468"
     }
   },
   "parameters": {
@@ -97,7 +97,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "13496267816894311538"
+              "templateHash": "9435641104776284269"
             }
           },
           "parameters": {
@@ -494,6 +494,10 @@
             "actionGroupId": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', 'alerts'), '2022-09-01').outputs.actionGroupId.value]"
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', 'watchdog-law')]"
             }
           }
         }
@@ -501,6 +505,114 @@
       "dependsOn": [
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', 'watchdog-rg')]"
       ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "workbook",
+      "resourceGroup": "watchdog-rg",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "workbookDisplayName": {
+            "value": "VM Health & Cost"
+          },
+          "workbookType": {
+            "value": "workbook"
+          },
+          "workbookSourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'core'), '2022-09-01').outputs.logAnalyticsWorkspaceId.value]"
+          },
+          "workbookId": {
+            "value": "[guid(subscriptionResourceId('Microsoft.Resources/resourceGroups', 'watchdog-rg'), 'VM Health & Cost')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.36.177.2456",
+              "templateHash": "8889365407949988112"
+            }
+          },
+          "parameters": {
+            "workbookDisplayName": {
+              "type": "string",
+              "defaultValue": "metric workbooks",
+              "metadata": {
+                "description": "The friendly name for the workbook that is used in the Gallery or Saved List.  This name must be unique within a resource group."
+              }
+            },
+            "workbookType": {
+              "type": "string",
+              "defaultValue": "workbook",
+              "metadata": {
+                "description": "The gallery that the workbook will been shown under. Supported values include workbook, tsg, etc. Usually, this is 'workbook'"
+              }
+            },
+            "workbookSourceId": {
+              "type": "string",
+              "defaultValue": "azure monitor",
+              "metadata": {
+                "description": "The id of resource instance to which the workbook will be associated"
+              }
+            },
+            "workbookId": {
+              "type": "string",
+              "metadata": {
+                "description": "The unique guid for this workbook instance"
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location for the workbook resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/workbooks",
+              "apiVersion": "2022-04-01",
+              "name": "[parameters('workbookId')]",
+              "location": "[parameters('location')]",
+              "kind": "shared",
+              "properties": {
+                "displayName": "[parameters('workbookDisplayName')]",
+                "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":10,\"content\":{\"chartId\":\"workbook1944b7e1-1d0b-4736-8545-7bb34a8c1eef\",\"version\":\"MetricsItem/2.0\",\"size\":0,\"chartType\":2,\"resourceType\":\"microsoft.compute/virtualmachines\",\"metricScope\":0,\"resourceIds\":[\"/subscriptions/7db537f3-cf39-4fec-9d98-9e2d131f4a4c/resourceGroups/watchdog-rg/providers/Microsoft.Compute/virtualMachines/watchdog-vm0\"],\"timeContext\":{\"durationMs\":86400000},\"metrics\":[{\"namespace\":\"microsoft.compute/virtualmachines\",\"metric\":\"microsoft.compute/virtualmachines--Percentage CPU\",\"aggregation\":4,\"columnName\":\" Percentage CPU metric\"}],\"title\":\"Percentage CPU chart\",\"gridSettings\":{\"rowLimit\":10000}},\"name\":\"metric - 1\"},{\"type\":10,\"content\":{\"chartId\":\"workbook9aeb0290-4486-40e6-adfd-36219a1ce487\",\"version\":\"MetricsItem/2.0\",\"size\":0,\"chartType\":2,\"resourceType\":\"microsoft.compute/virtualmachines\",\"metricScope\":0,\"resourceIds\":[\"/subscriptions/7db537f3-cf39-4fec-9d98-9e2d131f4a4c/resourceGroups/watchdog-rg/providers/Microsoft.Compute/virtualMachines/watchdog-vm0\"],\"timeContext\":{\"durationMs\":86400000},\"metrics\":[{\"namespace\":\"microsoft.compute/virtualmachines\",\"metric\":\"microsoft.compute/virtualmachines--Data Disk Read Bytes/sec\",\"aggregation\":4,\"columnName\":\"Disk Read Bytes/sec metric\"}],\"title\":\"Disk Read Bytes/sec\",\"gridSettings\":{\"rowLimit\":10000}},\"name\":\"metric - 2\"},{\"type\":9,\"content\":{\"version\":\"KqlParameterItem/1.0\",\"parameters\":[{\"id\":\"08a19065-ed93-492e-9336-f9de35206764\",\"version\":\"KqlParameterItem/1.0\",\"name\":\"workspace\",\"type\":5,\"typeSettings\":{\"additionalResourceOptions\":[]},\"timeContext\":{\"durationMs\":86400000},\"value\":null}],\"style\":\"pills\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"name\":\"parameters - 3\"},{\"type\":10,\"content\":{\"chartId\":\"workbook019ea4e9-f443-4a28-b555-71b50cb6f689\",\"version\":\"MetricsItem/2.0\",\"size\":0,\"chartType\":2,\"resourceType\":\"microsoft.compute/virtualmachines\",\"metricScope\":0,\"resourceIds\":[\"/subscriptions/7db537f3-cf39-4fec-9d98-9e2d131f4a4c/resourceGroups/watchdog-rg/providers/Microsoft.Compute/virtualMachines/watchdog-vm0\"],\"timeContext\":{\"durationMs\":86400000},\"metrics\":[{\"namespace\":\"microsoft.compute/virtualmachines\",\"metric\":\"microsoft.compute/virtualmachines--Data Disk Write Bytes/sec\",\"aggregation\":4,\"columnName\":\"disk write metric\"}],\"title\":\"disk wrte metrics\",\"gridSettings\":{\"rowLimit\":10000}},\"name\":\"metric - 4\"}],\"isLocked\":false,\"defaultResourceIds\":[\"/subscriptions/7db537f3-cf39-4fec-9d98-9e2d131f4a4c/resourceGroups/watchdog-rg/providers/Microsoft.OperationalInsights/workspaces/watchdog-law\",\"Azure Monitor\"],\"fallbackResourceIds\":[\"/subscriptions/7db537f3-cf39-4fec-9d98-9e2d131f4a4c/resourceGroups/watchdog-rg/providers/Microsoft.OperationalInsights/workspaces/watchdog-law\",\"Azure Monitor\"]}",
+                "version": "1.0",
+                "sourceId": "[parameters('workbookSourceId')]",
+                "category": "[parameters('workbookType')]"
+              }
+            }
+          ],
+          "outputs": {
+            "workbookId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/workbooks', parameters('workbookId'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'core')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', 'watchdog-rg')]"
+      ]
     }
-  ]
+  ],
+  "outputs": {
+    "monitorWorkbookResourceId": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, 'watchdog-rg'), 'Microsoft.Resources/deployments', 'workbook'), '2022-09-01').outputs.workbookId.value]"
+    }
+  }
 }
