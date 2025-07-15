@@ -2,7 +2,9 @@ name: Azure Bicep Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - add-workbook
 
 permissions:
   id-token: write
