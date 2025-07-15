@@ -63,7 +63,7 @@ resource budget 'Microsoft.Consumption/budgets@2024-08-01' = {
 
 
 // 3. Deploy the Monitor Workbook
-module workbookModule 'modules/workbook/workbook/bicep' = {
+module workbookModule 'modules/workbook/workbook.bicep' = {
   name: 'workbook'
   scope: rg
   params: {
