@@ -1,3 +1,4 @@
+[![Azure Bicep Deploy](https://github.com/AbdullahMemon15/azure-watchdog/actions/workflows/azure-deploy.yml/badge.svg?branch=main)](https://github.com/AbdullahMemon15/azure-watchdog/actions/workflows/azure-deploy.yml)
 # Azure “Watchdog” – Cost & Health Lab
 |  |  |
 |---|---|
