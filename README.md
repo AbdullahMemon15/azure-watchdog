@@ -1,28 +1,146 @@
 [![Azure Bicep Deploy](https://github.com/AbdullahMemon15/azure-watchdog/actions/workflows/azure-deploy.yml/badge.svg?branch=main)](https://github.com/AbdullahMemon15/azure-watchdog/actions/workflows/azure-deploy.yml)
+
 # Azure “Watchdog” – Cost & Health Lab
-|  |  |
-|---|---|
-| **Deploy in one line** | `az deployment sub create -l eastus -f main.bicep -p adminPassword=<Your@Pwd1>` |
-| **What it builds** | RG (`watchdog-rg`) with 2 × B1s VMs, storage, Log Analytics, budget, locks & alerts |
-| **Why it matters** | Shows governance, monitoring and cost-control patterns used by real-world clients |
 
-![Architecture diagram](docs/screens/arch-graph.png)
-
-## Architecture
-
-* Resource Group tagged `env=dev`, **read-only lock**
-* 2 × B1s Windows 2019 VMs (Update Mgmt)
-* VNet 10.10.0.0/16, subnet /24
-* Log Analytics (30-day retention)
-* Hot-tier storage account
-* Monthly **budget** with 80 % alert (e-mail / Teams)
+> Stand up a fully automated Azure environment with best-practice governance, monitoring, and cost controls—powered by Bicep + GitHub Actions.
 
 ---
 
-## CI/CD
+## 📚 Table of Contents
 
-GitHub Actions (`.github/workflows/deploy.yml`) validates & deploys on push to **main**.
+1. [Overview](#overview)  
+2. [Prerequisites](#prerequisites)  
+3. [Quick Deploy](#quick-deploy)  
+4. [What It Builds](#what-it-builds)  
+5. [Architecture Diagram](#architecture-diagram)  
+6. [Modules](#modules)  
+7. [CI/CD](#cicd)  
+8. [Workbook Preview](#workbook-preview)  
+9. [Troubleshooting](#troubleshooting)  
+10. [Contributing](#contributing)  
+11. [License](#license)
 
-## Workbook preview
+---
+
+## 🔍 Overview
+
+This project demonstrates how to automate Azure resource provisioning, governance, monitoring, and cost management using:
+
+- **Bicep** for concise, modular infra-as-code  
+- **GitHub Actions** for CI/CD (validate & deploy on push)  
+- **Azure Policies, RBAC, and Locks** to enforce best practices  
+- **Monitor Workbook & Alerts** for real‑time VM health & budget tracking  
+
+---
+
+## 🚀 Prerequisites
+
+- [Azure CLI](https://aka.ms/azure-cli) ≥ 2.50  
+- Bicep CLI (bundled with Azure CLI)  
+- A service principal or login with **Owner** rights on your subscription  
+- `git` and a GitHub repo fork/clone  
+
+---
+
+## ⚡ Quick Deploy
+
+```bash
+# Subscription‑level deployment:
+az deployment sub create \
+  -l canadaeast \
+  -f main.bicep \
+  -p adminPassword="<YourP@ssw0rd!234>" \
+     budgetAmount=20
+```
+Or, to target a specific RG:
+```bash
+az deployment group create \
+  --resource-group watchdog-rg \
+  -f main.bicep \
+  -p adminPassword="<YourP@ssw0rd!234>" \
+     budgetAmount=20
+```
+## 🏗 What It Builds
+
+| Resource                     | Details                                                                   |
+|------------------------------|---------------------------------------------------------------------------|
+| **Resource Group**           | `watchdog-rg` with tags `env=dev`, `owner=<you>` and a **CanNotDelete** lock |
+| **Virtual Network**          | `10.10.0.0/16`, Subnet `10.10.1.0/24`                                     |
+| **2× B1s Windows VMs**       | Joined to Log Analytics, boot diagnostics enabled                         |
+| **Log Analytics Workspace**  | 30‑day retention, linked to VM agents                                     |
+| **Storage Account**          | Hot tier, RA-GRS                                                          |
+| **Budget & Alert**           | Monthly budget, 80% email & Teams notifications                           |
+| **Monitor Workbook**         | Custom charts: CPU %, Disk R/W, cost overview                             |
+
+## 🖼 Architecture Diagram
+
+![Architecture diagram](docs/screens/workbook.png)
+
+*Figure: Bicep modules & resource relationships*
+
+## 📦 Modules
+
+- **core.bicep**  
+  RG lock, Log Analytics, VM & network modules  
+- **network.bicep**  
+  Virtual Network + Subnet  
+- **vms.bicep**  
+  2× Windows VMs + Log Analytics extension  
+- **alerts.bicep**  
+  Action Group + Heartbeat alert rule  
+- **workbook.bicep**  
+  Parameterized Monitor Workbook template  
+
+## 🔄 CI/CD
+
+This repo uses **GitHub Actions** (`.github/workflows/azure-deploy.yml`):
+
+```yaml
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: azure/setup-cli@v1
+      - run: az bicep build --file main.bicep
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - run: |
+          az deployment sub create \
+            -l ${{ inputs.location }} \
+            -f main.bicep \
+            -p adminPassword="${{ secrets.ADMIN_PASSWORD }}" \
+               budgetAmount=${{ inputs.budgetAmount }}
+```
+
+## 📊 Workbook Preview
 
 ![Workbook demo](docs/screens/workbook-demo.gif)
+
+*Figure: VM health metrics & budget status*
+
+## 🛠 Troubleshooting
+
+- **Missing module path**  
+  Ensure `modules/workbook/workbook.bicep` exists and is referenced exactly in `main.bicep`.
+- **RBAC propagation delays**  
+  Insert a short sleep (`sleep 60`) or split pipeline into stages so roles propagate before deploying budgets/workbooks.
+- **Template validation**  
+  Use `az deployment group what-if` to preview resource changes without applying them.
+
+## 🤝 Contributing
+
+1. Fork the repo  
+2. Create a branch:
+   ```bash
+   git checkout -b feature/xyz
+   ```
+3. Commit your changes & push to your branch
+4. Open a Pull Request against main
