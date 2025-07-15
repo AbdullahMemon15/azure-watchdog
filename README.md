@@ -74,7 +74,7 @@ az deployment group create \
 
 ## 🖼 Architecture Diagram
 
-![Architecture diagram](docs/screens/workbook.png)
+![Architecture diagram](docs/screens/arch-graph.png)
 
 *Figure: Bicep modules & resource relationships*
 
@@ -122,9 +122,24 @@ jobs:
 
 ## 📊 Workbook Preview
 
-![Workbook demo](docs/screens/workbook-demo.gif)
+![Workbook demo](docs/screens/workbook.png)
 
-*Figure: VM health metrics & budget status*
+## 🧹 Cleanup / Teardown
+
+> **WARNING:** These commands will **remove** _all_ resources in the `watchdog-rg` resource group, including locks.
+
+```bash
+# 1. Remove the read‑only lock so the RG can be deleted
+az lock delete \
+  --name rg-readonly \
+  --resource-group watchdog-rg
+
+# 2. Delete the entire resource group (and everything inside)
+az group delete \
+  --name watchdog-rg \
+  --yes \
+  --no-wait
+```
 
 ## 🛠 Troubleshooting
 
